@@ -1,0 +1,40 @@
+﻿@page
+@model NotifUI.Pages.esearchModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Notiflib;
+@{
+}
+<html>
+	<head>
+		<title>Поиск событий</title>
+	</head>
+	<body>
+		<table>
+			<thead>
+				<tr>
+					<td>Название события</td>
+					<td>Тип события</td>
+					<td>Создатель</td>
+					<td>Действие</td>
+				</tr>
+			</thead>
+		@foreach(Event ewent in Model.eventsList)
+		{
+			<tr>
+				<th>@ewent.title</th>
+				<th>@ewent.type</th>
+				@{
+					User user = (from e in Model.eventsList 
+						join u in Model.context.users on e.creator.id equals u.id 
+						where e.id == ewent.id select u).FirstOrDefault();
+				}
+				@if(user != null)
+				{
+					<th>@user.l_name @user.f_name @user.patronimic</th>
+				}
+				<th><a asp-page="event" asp-route-id="@ewent.id">Перейти</a></th>
+			</tr>
+		}
+		</table>
+	</body>
+</html>

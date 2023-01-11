@@ -1,0 +1,141 @@
+﻿@page
+@model NotifUI.Pages.eventModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Notiflib;
+@{
+}
+<html>
+	<head>
+		<title>@Model.Curent_event.title</title>
+		<link rel="stylesheet" href="~/css/account.css" type="text/css" />
+	</head>
+	<body>
+		<h1>Информация</h1>
+		<p>
+			"@Model.Curent_event.title"<br />
+			Тип: @Model.Curent_event.type<br />
+			Описание: @Model.Curent_event.discription<br />
+			Приватность: @Model.privacy.name<br />
+			Даты проведения: c @Model.Curent_event.start.ToString() до @Model.Curent_event.end.ToString()
+		</p>
+	@if (Model.isYours)
+	{
+		<div id="eventData" class="close">
+			<form method="post" asp-antiforgery="true" asp-page-handler="DataInput" asp-route-id = "@Model.Curent_event.id">
+				<p>
+					<label asp-for="eventData.start">Начало события</label>
+					<input asp-for="eventData.start" required value="@Model.Curent_event.start"/>
+				</p>
+				<p>
+					<label asp-for="eventData.end">Конец события</label>
+					<input asp-for="eventData.end" required value="@Model.Curent_event.end" />
+				</p>
+				<p>
+					<label asp-for="eventData.title">Название События</label>
+					<input asp-for="eventData.title" required value="@Model.Curent_event.title" />
+				</p>
+				<p>
+					<label asp-for="eventData.type">Тип события</label>
+					<input asp-for="eventData.type" required value="@Model.Curent_event.type" />
+				</p>
+				<p>
+					<label asp-for="eventData.discription">Описание</label>
+					<input asp-for="eventData.discription" required value="@Model.Curent_event.discription" />
+				</p>
+				<p>
+					<label asp-for="eventData.place">Место проведения</label>
+					<input asp-for="eventData.place" required value="@Model.Curent_event.place" />
+				</p>
+				<input type="submit" value="Отправить"/>
+				<button onclick="CloseForm('eventData')">Отмена</button>
+			</form>
+		</div>
+		<button onclick="OpenForm('eventData')">Изменить</button>
+		<script>
+				function OpenForm(id){
+					const resForm = document.getElementById(id);
+					resForm.classList.remove("close");
+				}
+				function CloseForm(id){
+					const resForm = document.getElementById(id);
+					resForm.classList.add("close")
+				}
+		</script>
+	}
+	<h2>Участники</h2>
+	@if (Model.isYours)
+	{
+		<p><b>Владелец:</b> вы</p>
+	}
+	else
+	{
+		<p><b>Владелец:</b> @Model.owner.l_name @Model.owner.f_name @Model.owner.patronimic</p>
+	}
+	<ul>
+		@foreach(User user in Model.participants)
+		{
+			<li>@user.l_name @user.f_name @user.patronimic</li>
+		}
+	</ul>
+	@if(Model.isNotPart && Model.privacy.id == 1)
+	{
+		<a asp-page="event" asp-page-handler="Participant" asp-route-id="@Model.Curent_event.id">
+			<button>
+				Вступить
+			</button>
+		</a>
+	}
+	@if (Model.isNotAppl && Model.privacy.id == 2)
+	{
+		<a asp-page="event" asp-page-handler="Application" asp-route-id="@Model.Curent_event.id">
+			<button>
+				Подать заявку
+			</button>
+		</a>
+	}
+	@if (!Model.isNotAppl && Model.privacy.id == 2 && Model.isNotPart)
+	{
+		<p>
+			заявка подана
+		</p>
+	}
+	@if (Model.isYours && Model.applications.Count != 0)
+	{
+		<h2>Заявки на вступление</h2>
+		<ul>
+			@foreach (User u in Model.applications)
+			{
+				<li>@u.l_name @u.f_name @u.patronimic <a asp-page="event" asp-page-handler="AcceptAplication" asp-route-id=@Model.Curent_event.id asp-route-user="@u.id">Принять</a></li>
+			}
+		</ul>
+	}
+	@if (Model.isPart)
+	{
+		<h2>Уведомления</h2>
+		<ul>
+		@foreach(var n in Model.notifications)
+		{
+			<li>
+				@n.date @n.discription
+			</li>
+		}</ul>
+		<div id="notifData" class="close">
+		<form method="post" asp-antiforgery="true" asp-page-handler="NotifInput" asp-route-id="@Model.Curent_event.id">
+			<p>
+				<label asp-for="notifData.date">Дата отправки</label>
+				<input type="date" asp-for="notifData.date" required />
+			</p>
+			<p>
+				<label asp-for="notifData.discr">Описание</label>
+				<input asp-for="notifData.discr" required />
+			</p>
+			<input type="submit" value="Отправить" />
+			<button onclick="CloseForm('notifData')">Отмена</button>
+		</form>
+	</div>
+	<button onclick="OpenForm('notifData')">Добавить</button>
+	}
+	
+	<h4>@Model.mess</h4>
+</body>
+</html>

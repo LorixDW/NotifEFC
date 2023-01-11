@@ -1,0 +1,163 @@
+﻿@page
+@using Notiflib;
+@model NotifUI.Pages.accountModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@functions{
+}
+<html>
+	<head>
+		<title>
+			Account
+		</title>
+		<link rel="stylesheet" href="~/css/account.css" type="text/css"/>
+	</head>
+	<body>
+		<div>
+			<h2>Об аккаунте</h2>
+			<p>
+				@Html.Raw(Model.message)
+			</p>
+			<button onclick="OpenForm('userDataInput')">
+				Изменить
+			</button>
+			<div id="userDataInput" class="close">
+				<form method="post" asp-antiforgery="true" asp-page-handler="DataInput">
+					<p>
+						<label asp-for="userData.F">Фамилия</label>
+						<input type="text" asp-for="userData.F" value=@Model.user.l_name required />
+					</p>
+					<p>
+						<label asp-for="userData.I">Имя</label>
+						<input type="text" asp-for="userData.I" value=@Model.user.f_name required />
+					</p>
+					<p>
+						<label asp-for="userData.O">Отчество</label>
+						<input type="text" asp-for="userData.O" value=@Model.user.patronimic required />
+					</p>
+					<p>
+						<label asp-for="userData.email">Email</label>
+						<input type="email" asp-for="userData.email" value=@Model.user.email required />
+					</p>
+					<p>
+						<label asp-for="userData.number">Телефон</label>
+						<input type="text" asp-for="userData.number" pattern="[0-9]{11,13}" value=@Model.user.number required />
+					</p>
+				<input type="submit" value="Отправить" />
+				<button onclick="CloseForm('userDataInput')">Отмена</button>
+				</form>
+			</div>
+			<a asp-page = "index" asp-page-handler="DeAuf">Выйти</a>
+		</div>
+		<div>
+			<h2>Внешние ресурсы</h2>
+			<ul>
+				@foreach(String str in Model.userResurses)
+			{
+				<li>@str</li>
+			}
+			</ul>
+			<div id="resInput" class="close">
+				<form method="post" asp-antiforgery="true" asp-page-handler="Res">
+					<label asp-for="href">Введите vk id / telegram адрес</label><br />
+					<input type="text" asp-for="href" required/>
+					<select asp-for="res_type" required>
+						<option>VK</option>
+						<option>FB</option>
+						<option>Telegram</option>
+					</select>
+					<p>@Model.message1</p>
+				<input type="submit" value="Отправить"/>
+				<button onclick="CloseForm('resInput')">Отмена</button>
+				</form>
+				
+			</div>
+		<button onclick="OpenForm('resInput')">Добавить / изменить</button>
+			<script>
+				function OpenForm(id){
+					const resForm = document.getElementById(id);
+					resForm.classList.remove("close");
+				}
+				function CloseForm(id){
+					const resForm = document.getElementById(id);
+					resForm.classList.add("close")
+				}
+			</script>
+		</div>
+		<div>
+			<h2>Ваши события(Созданные вами)</h2>
+			<ul>
+				@foreach (Event ewent in Model.events)
+				{
+					<li><p>"@ewent.title"<br />
+						Тип: @ewent.type<br />
+						Описание: @ewent.discription<br />
+						Время проведения: с @ewent.start.ToString() до @ewent.end.ToString()</p>
+					<a asp-page="event" asp-route-id="@ewent.id">Подробнее...</a>
+					</li>
+				}
+			</ul>
+		<h2>Ваши события(Как участника)</h2>
+		<div>
+			<ul>
+				@foreach(Event ewent in Model.events_entered)
+				{
+					<li><p>"@ewent.title"<br />
+						Тип: @ewent.type<br />
+						Описание: @ewent.discription<br />
+						Время проведения: с @ewent.start.ToString() до @ewent.end.ToString()</p>
+					<a asp-page="event" asp-route-id="@ewent.id">Подробнее...</a>
+					</li>
+				}
+			</ul>
+			
+		</div>
+			<div id="eventCreate" class="close">
+				<form method="post" asp-antiforgery="true" asp-page-handler="Event">
+				<p>
+					<label asp-for="eventData.start">Начало события</label>
+					<input asp-for="eventData.start" required />
+				</p>
+				<p>
+					<label asp-for="eventData.end">Конец события</label>
+					<input asp-for="eventData.end" required />
+				</p>
+				<p>
+					<label asp-for="eventData.title">Название События</label>
+					<input asp-for="eventData.title" required />
+				</p>
+				<p>
+					<label asp-for="eventData.type">Тип события</label>
+					<input asp-for="eventData.type" required />
+				</p>
+				<p>
+					<label asp-for="eventData.discription">Описание</label>
+					<input asp-for="eventData.discription" required />
+				</p>
+				<p>
+					<label asp-for="eventData.place">Место проведения</label>
+					<input asp-for="eventData.place" required />
+				</p>
+				<p>
+					<label asp-for="eventData.privacy">Приватность события</label>
+					<select asp-for="eventData.privacy">
+						<option value=1>Открытое</option>
+						<option value=2>Полуоткрытое</option>
+						<option value=3>Закрытое</option>
+					</select>
+				</p>
+				<p>
+					*В открытые события могут вступать все пользователи<br/>
+					в полуоткрытые - по приглашению, или по заявке на вступление<br />
+					в закрытые - события только по приглошению
+				</p>
+				<input type="submit" value="Отправить" />
+				<button onclick="CloseForm('eventCreate')">Отмена</button>
+				</form>
+			</div>
+		<input onclick="OpenForm('eventCreate')" type="button" value="Создать" />
+			<a asp-page="esearch">
+				<input type="button" value="Вступить" />
+			</a>
+		</div>
+	</body>
+</html>
